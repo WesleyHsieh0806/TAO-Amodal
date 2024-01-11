@@ -60,13 +60,66 @@ bash environment_setup.sh
 ```
 
 ## :books: Prepare Dataset
-   Incoming...
-   
+
+1. Download our dataset following the instructions [here](https://huggingface.co/datasets/chengyenhsieh/TAO-Amodal).
+2. The directory should have the following structure:
+
+   ```
+   TAO-Amodal
+    ├── frames
+    │    └── train
+    │       ├── ArgoVerse
+    │       ├── BDD
+    │       ├── Charades
+    │       ├── HACS
+    │       ├── LaSOT
+    │       └── YFCC100M
+    ├── amodal_annotations
+    │    ├── train/validation/test.json
+    │    ├── train_lvis_v1.json
+    │    └── validation_lvis_v1.json
+    ├── example_output
+    │    └── prediction.json
+    ├── BURST_annotations
+    │    ├── train
+    │         └── train_visibility.json
+    │    ...
+    ```
+   </p></details>
+ 
+>    Explore more examples from our dataset [here](https://tao-amodal.github.io/dataset.html).
+
 ## :artist: Visualization
+
+
 
 ## :running: Training
 
 ## :bar_chart: Evaluation
+
+1. Output tracker predictions as json.
+The predictions should be structured as:
+```bash
+[{
+    "image_id" : int,
+    "category_id" : int,
+    "bbox" : [x,y,width,height],
+    "score" : float,
+    "track_id": int,
+    "video_id": int
+}]
+```
+
+> We also provided an example output prediction json [here](https://huggingface.co/datasets/chengyenhsieh/TAO-Amodal/blob/main/example_output/prediction.json). Refer to this file to check the correct format.
+
+2. Evaluate on TAO-Amodal
+```bash
+cd tools
+python eval_on_tao_amodal.py --track_result /path/to/prediction.json \
+                             --output_log   /path/to/output.log \
+                             --annotation   /path/to/validation_lvis_v1.json
+```
+ 
 
 
 ## Citations
