@@ -63,8 +63,7 @@ bash environment_setup.sh
 
 1. Download our dataset following the instructions [here](https://huggingface.co/datasets/chengyenhsieh/TAO-Amodal).
 2. The directory should have the following structure:
-
-   ```
+   ```bash
    TAO-Amodal
     ├── frames
     │    └── train
@@ -85,7 +84,7 @@ bash environment_setup.sh
     │         └── train_visibility.json
     │    ...
     ```
-   </p></details>
+
  
 >    Explore more examples from our dataset [here](https://tao-amodal.github.io/dataset.html).
 
