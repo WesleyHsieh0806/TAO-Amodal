@@ -88,12 +88,12 @@ The prediction JSON should be structured following [this format](https://hugging
 
 * Visualize all tracks from randomly picked videos.
 ```bash
-python ./vis_amodal_prediction_comparison.py \
+python ./vis_prediction.py \
     --annotations /path/to/TAO-Amodal/amodal_annotations/validation_lvis_v1.json \
     --predictions /path/to/prediction.json \
     --split val \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO-Amodal-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal/frames \
     --slow-down 15 \
     --speed-up 1 \
     --random-quality-check True \
@@ -103,18 +103,18 @@ python ./vis_amodal_prediction_comparison.py \
 * Display the specified track with a specific color using `--filter-tracks` and `--color`.
     
 ```bash
-python ./vis_amodal_prediction_comparison.py \
+python ./vis_prediction.py \
     --annotations /path/to/TAO-Amodal/amodal_annotations/validation_lvis_v1.json \
     --predictions /path/to/prediction.json \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO-Amodal-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal/frames \
     --split val \
     --slow-down 15 \
     --speed-up 1 \
     --transparent True \
-    --filter-tracks 120002060002 \
-    --color 255 244 146 \
-    --video-name val/ArgoVerse/side_left_043aeba7-14e5-3cde-8a5c-639389b6d3a6
+    --filter-tracks 138807920001 \
+    --color 255 80 133 \
+    --video-name val/AVA/Ic0LMbDyc9Y_scene_7_61166-62253 
 ```
 
 #### 2. Compare Tracker Predictions
@@ -123,19 +123,19 @@ Use the following command to compare predictions, `--predictions` and `--predict
 
 ```bash
 # Show specified track with a certain color
-python ./vis_amodal_prediction_comparison.py \
+python ./vis_prediction_comparison.py \
     --annotations /path/to/TAO-Amodal/amodal_annotations/validation_lvis_v1.json \
     --predictions /path/to/modal_prediction.json \
     --predictions2 /path/to/prediction.json \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO-Amodal-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal/frames \
     --split val \
     --slow-down 15 \
     --speed-up 1 \
     --transparent True \
-    --filter-tracks 120002060002 \
-    --color 255 244 146 \
-    --video-name val/ArgoVerse/side_left_043aeba7-14e5-3cde-8a5c-639389b6d3a6
+    --filter-tracks 138807920001 \
+    --color 255 80 133 \
+    --video-name val/AVA/Ic0LMbDyc9Y_scene_7_61166-62253 
 ```
 
 | Modal | Amodal|

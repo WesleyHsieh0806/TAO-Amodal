@@ -6,6 +6,7 @@ import logging
 import multiprocessing
 from pathlib import Path
 import random
+import json
 
 import numpy as np
 from natsort import natsorted
@@ -14,6 +15,7 @@ from pycocotools.coco import COCO
 from script_utils.common import common_setup
 import cv2
 from tqdm import tqdm
+from collections import defaultdict
 
 import tao.utils.vis as vis_utils
 from tao.utils import fs
@@ -21,17 +23,14 @@ from tao.utils.coco import interpolate_annotations
 from tao.utils.colormap import colormap
 from tao.utils.misc import parse_bool
 from tao.utils.video import video_writer
-from burstapi import BURSTDataset
-import burstapi.visualization_utils as viz_utils
+from tao.utils.load_prediction import Prediction
 from utils import get_video_name, default_arg_parser, clip_annotation
 
 def visualize_star(x):
     return visualize(*x)
 
 
-def visualize(coco, video: str, labeled_frames, args, burst_video):
-    # Ensure amodal/mask annotations correspond to the same video
-    assert (video in burst_video.name) or (burst_video.name in video), ("videos of Amodal Annotations and mask annotations do not align!")
+def visualize(coco, video: str, labeled_frames, args, tao_amodal_prediction, tao_amodal_prediction2):
     separator = args.separator_width
 
     output_video = args.output_dir / (video + '.mp4')
@@ -74,9 +73,30 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
         frame.rsplit('.', 1)[0]: coco.imgToAnns[info['id']]
         for frame, info in frame_infos.items()
     }
+
+    # Get predictions.
+    frame_predictions = {
+        frame.rsplit('.', 1)[0]: tao_amodal_prediction.imgToAnns[info['id']]
+        for frame, info in frame_infos.items()
+    }
+    frame_predictions2 = {
+        frame.rsplit('.', 1)[0]: tao_amodal_prediction2.imgToAnns[info['id']]
+        for frame, info in frame_infos.items()
+    }
+
     if args.skip_unknown_categories:
         for frame, anns in frame_annotations.items():
             frame_annotations[frame] = [
+                x for x in anns
+                if coco.cats[x['category_id']]['synset'] != 'unknown'
+            ]
+
+            frame_predictions[frame] = [
+                x for x in anns
+                if coco.cats[x['category_id']]['synset'] != 'unknown'
+            ]
+
+            frame_predictions2[frame] = [
                 x for x in anns
                 if coco.cats[x['category_id']]['synset'] != 'unknown'
             ]
@@ -88,14 +108,11 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                 if f.stem in frame_annotations)
 
     frames = frames[first:last+1]
-    
-    # Generate annotations at non-annotated frames using interpolation.
     interpolated_annotations = {}
-    if args.use_tracks and args.interpolate:
+    if args.use_tracks and args.interpolate and args.speed_up > 0:
         interpolated_annotations = interpolate_annotations(
-            [x.stem for x in frames], frame_annotations, modal=args.modal)
+            [x.stem for x in frames], frame_annotations)
 
-    # If not None, we additionally draw original frames along with the labeled frames.
     unlabeled_location = None
     if (args.original_location == 'top'
             or (args.original_location == 'auto' and width > height)):
@@ -113,188 +130,160 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
         if cat['name'] == 'baby':
             cat['name'] = 'person'
 
-    nof_annotated = 0
-    min_track = float('inf')
-
-    '''
-    * Video visualization
-    '''
-    with video_writer(str(output_video), (width, height)) as writer:
+    with video_writer(str(output_video), (width*2, height)) as writer:
         # Randomly clip video lengths to a certain length.
         if args.clip_video_length:
-            for frame in frames:
-                if frame.stem not in frame_annotations:
-                    continue
-                annotations = frame_annotations[frame.stem]
-                if annotations:
-                    min_track = min([x['track_id'] for x in annotations])
-                    break
             first_frame_start, first_frame_end = 0, max(len(frames) - args.clip_video_length, 0)
             first_frame = random.randint(first_frame_start, first_frame_end)
             frames = frames[first_frame: first_frame + args.clip_video_length]
         
         for i, frame in enumerate(frames):
-
-            is_mask_annotated = burst_video.is_mask_annotated(frame)
             is_annotated = frame.stem in frame_annotations
             is_interpolated = frame.stem in interpolated_annotations
             
-            # Ignore all unlabeled frames when speed_up is -1.
-            if ((not is_mask_annotated) and (not is_annotated)
+            # Ignore those unlabeled frames when speed_up < 0.
+            if ((not is_annotated)
                     and (args.speed_up < 0 or (i % args.speed_up) != 0)):
                 continue
+
+
             frame = Path(str(frame).replace('ArgoVerse1.1', 'Argoverse-1.1'))
             image = np.array(Image.open(frame))
-            full_image = np.ones((height*2, width*2, 3), dtype=np.uint8) * 255
-            startx = int(width/2)
+            full_image = np.ones((int(height*1.5), int(width*3.0), 3), dtype=np.uint8) * 255
+            startx = int(width/4)
             endx = startx + width
-            starty = int(height/2)
+            starty = int(height/5)
             endy = starty + height
             full_image[starty:endy, startx:endx, :] = image
-            
+
             '''
             * Show Image ID.
             '''
             if is_annotated:
                 annotations = frame_annotations[frame.stem]
-                if min_track == float('inf') and annotations:
-                    min_track = min([x['track_id'] for x in annotations])
-
+                predictions = frame_predictions[frame.stem]
                 if annotations:
                     image_id = annotations[0]['image_id']
+                elif predictions:
+                    image_id = predictions[0]['image_id']
                 else:
                     image_id = "/".join(str(frame).split("/")[-3:])
                 if args.show_image_id:
-                    full_image = vis_utils.vis_class(full_image, [int(startx), starty // 2], str(image_id),
+                    full_image = vis_utils.vis_class(full_image, [int(startx + (endx - startx)* 0.4 ), starty // 2], str(image_id),
                                     bg_color=(255, 255, 255),
                                     text_color=(0, 0, 0),
                                     font_scale=2.5,
                                     thickness=3)
+        
+            # Draw the raw image for the second tracker predictions.
+            full_image[starty:endy, 
+                    int(width*1.5+startx): int(width*1.5+endx)] = image
+    
                 
             '''
-            * Plot the mask annotation
-            '''
-            if is_mask_annotated:
-                mask_t = burst_video.get_mask_by_frame(frame)
-
-                for track_id in mask_t:
-                    color = color_map[track_id]
-                    if args.color:
-                        color = args.color
-                    
-                    # Uncomment the following two lines if you want to filter the mask with track ids.
-                    # if args.filter_tracks and (track_id + min_track - 1) not in args.filter_tracks:
-                    #     continue
-
-                    full_mask = np.zeros((1, height*2, width*2), dtype=np.uint8)
-                    full_mask[:, starty:endy, startx:endx] = mask_t[track_id].astype(np.uint8)
-                    full_image = vis_utils.vis_mask(full_image,
-                        full_mask,
-                        color,
-                        alpha=0.4,
-                        show_border=True,
-                        border_alpha=0.5,
-                        border_thick=1,
-                        border_color=None)
-
-                
-            '''
-            * Visualize Box Annotations.
+            * Plot the amodal annotation
             '''
             if is_annotated or is_interpolated:
                 if is_interpolated:
                     annotations = interpolated_annotations[frame.stem]
                 else:
                     annotations = frame_annotations[frame.stem]
-                colors = None
+                    predictions = frame_predictions[frame.stem]
+                    predictions2 = frame_predictions2[frame.stem]
 
-                # Get bounding box color for each track.
                 if args.use_tracks:
-                    colors = [
-                        color_map[x['track_id']  - min_track + 1] for x in annotations
+                    prediction_colors = [
+                        color_map[x['track_id']] for x in predictions
+                    ]
+                    prediction_colors2 = [
+                        color_map[x['track_id']] for x in predictions2
                     ]
                     if args.color:
-                        colors = [args.color for color in colors]
-                
-                # Filter tracks based on track ids.
+                        prediction_colors = [args.color for _ in prediction_colors]
+                        prediction_colors2 = [args.color for _ in prediction_colors2]
+
                 if args.filter_tracks:
-                    colors = [color for i, color in enumerate(colors) if annotations[i]['track_id'] in args.filter_tracks]
-                    annotations = [ann for ann in annotations if ann['track_id'] in args.filter_tracks]
+                    prediction_colors = [color for i, color in enumerate(prediction_colors) if predictions[i]['track_id'] in args.filter_tracks]
+                    prediction_colors2 = [color for i, color in enumerate(prediction_colors2) if predictions2[i]['track_id'] in args.filter_tracks]
+                    predictions = [pred for pred in predictions if pred['track_id'] in args.filter_tracks]
+                    predictions2 = [pred for pred in predictions2 if pred['track_id'] in args.filter_tracks]
                 
                 # Hyperparameters for bounding box and font.
                 opacity = -1
-                thickness = 3
+                thickness = 5
                 font_scale = 1.0
                 font_thickness = 2
                 
                 if args.clip_annotation:
                     for x in annotations:
                         clip_annotation(x, image)
-                
-                visualized = full_image.copy()
 
-                # Emphasize bounding boxes by increasing the transparency of background.
+                visualized = full_image.copy()
                 if args.transparent:
-                    visualized = vis_utils.transparent_except_bbox(visualized, annotations, modal=args.modal, opacity=0.25)
-                
-                # Draw the bounding box.
-                if not args.modal:
-                    visualized = vis_utils.overlay_amodal_boxes_coco(visualized,
-                                                          annotations,
-                                                          colors=colors,
+                    visualized[:, :(visualized.shape[1] // 2)] = vis_utils.transparent_except_bbox(visualized[:, :(visualized.shape[1]  // 2)], predictions, oy=starty,
+                                                          ox=startx, modal=True, opacity=0.4)
+                    visualized[:, (visualized.shape[1] // 2):] = vis_utils.transparent_except_bbox(visualized[:, (visualized.shape[1] // 2):], predictions2, oy=starty,
+                                                          ox=startx, modal=True, opacity=0.4)
+                     
+                # Draw the predicted bounding boxes
+                visualized = vis_utils.overlay_amodal_boxes_prediction(visualized,
+                                                          predictions,
+                                                          oy=starty,
+                                                          ox=startx,
+                                                          colors=prediction_colors,
                                                           thickness=thickness,
                                                           fill_opacity=opacity)
-                else:
-                    colors = [color for i, color in enumerate(colors) if 'bbox' in annotations[i]]
-                    visualized = vis_utils.overlay_modal_boxes_coco(visualized,
-                                                          annotations,
-                                                          colors=colors,
+
+                visualized = vis_utils.overlay_amodal_boxes_prediction(visualized,
+                                                          predictions2,
+                                                          oy=starty,
+                                                          ox=int(width*1.5+startx),
+                                                          colors=prediction_colors2,
                                                           thickness=thickness,
                                                           fill_opacity=opacity)
+
                 if args.show_categories:
-                    # Show the category name on top of each box.
-                    visualized = vis_utils.overlay_amodal_class_coco(
+                    visualized = vis_utils.overlay_amodal_class_prediction(
                         visualized,
-                        annotations,
+                        predictions,
+                        oy=starty,
+                        ox=startx,
                         categories=cats,
-                        font_scale=font_scale,
-                        background_colors=colors,
-                        font_thickness=font_thickness,
-                        show_track_id=args.show_track_id)
-                elif args.show_visibility:
-                    # Shows the category name on top of each box.
-                    visualized = vis_utils.overlay_amodal_visibility_coco(
-                        visualized,
-                        annotations,
-                        categories=cats,
+                        background_colors=prediction_colors,
                         font_scale=font_scale,
                         font_thickness=font_thickness,
                         show_track_id=args.show_track_id)
+                    
+                    visualized = vis_utils.overlay_amodal_class_prediction(
+                        visualized,
+                        predictions2,
+                        oy=starty,
+                        ox=int(width*1.5+startx),
+                        categories=cats,
+                        background_colors=prediction_colors2,
+                        font_scale=font_scale,
+                        font_thickness=font_thickness,
+                        show_track_id=args.show_track_id) 
 
                 if unlabeled_location == 'top':
                     visualized = np.concatenate(
                         [full_image, visualized])
+
                 elif unlabeled_location == 'left':
                     visualized = np.concatenate(
                         [full_image, visualized], axis=1)
-                
-                # Slow down frames with box annotations.
+
                 for _ in range(
                         args.slow_down if not is_interpolated else 1):
-                    visualized = cv2.resize(visualized, (width, height))
+                    visualized = cv2.resize(visualized, (width*2, height))
                     writer.write_frame(visualized)
-
             else:
                 if unlabeled_location == 'top':
                     full_image = np.concatenate([full_image, full_image])
                 elif unlabeled_location == 'left':
                     full_image = np.concatenate([full_image, full_image], axis=1)
-                
-                # Draw frames without box annotations.
-                # Note that frames with masks are not slowed down.
-                full_image = cv2.resize(full_image, (width, height))
+                full_image = cv2.resize(full_image, (width*2, height))
                 writer.write_frame(full_image)
-
 
 def main():
     '''
@@ -302,14 +291,14 @@ def main():
     '''
     args = default_arg_parser()
     args.output_dir.mkdir(exist_ok=True, parents=True)
-    common_setup(__file__, args.output_dir, args)
 
     '''
     * Create Dataset to load videos
     '''
     coco = COCO(args.annotations)
-    dataset = BURSTDataset(annotations_file=args.mask_annotations,
-                           images_base_dir=args.images_dir)
+    tao_amodal_prediction = Prediction(args.predictions, args.score_threshold)
+    tao_amodal_prediction2 = Prediction(args.predictions2, args.score_threshold)
+    
     '''
     * Get the video names we want.
     '''
@@ -332,7 +321,7 @@ def main():
     tasks = []
     for video, labeled_frames in videos.items():
         output_video = args.output_dir / (video + '.mp4')
-        tasks.append((coco, video, labeled_frames, args, dataset.get_video_by_name(video)))
+        tasks.append((coco, video, labeled_frames, args, tao_amodal_prediction, tao_amodal_prediction2))
 
     '''
     * Visualization with Multi-Processing

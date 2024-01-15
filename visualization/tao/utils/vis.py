@@ -201,21 +201,17 @@ def overlay_amodal_class_coco(image,
         label = categories[a['category_id']]['name']
         if label == 'baby':
             label = 'person'
-        # elif label == 'car_(automobile)':
-        #     label = 'car'
+
         if show_track_id and 'track_id' in a:
             label = f'{label} ({a["track_id"]})'
         labels.append(label)
-    # labels = [categories[i['category_id']]['name'] for i in annotations]
-    # labels = predictions.get_field("labels").tolist()
-    # labels = [categories[i] for i in labels]
+
     if oy is None and ox is None:
         oy, ox = image.shape[:2]
         oy, ox = int(oy / 4), int(ox / 4)
     boxes = [[int(round(y)) for y in x['amodal_bbox']] for x in annotations]
     boxes = [[box[0]+ox, box[1]+oy, box[2], box[3]] for box in boxes]
     if background_colors is None:
-        # colors = get_annotation_colors(annotations)
         colors = [_WHITE for _ in annotations]
     else:
         colors = background_colors
@@ -259,16 +255,14 @@ def overlay_amodal_class_prediction(image,
         if show_track_id and 'track_id' in a:
             label = f'{label} ({a["track_id"]})'
         labels.append(label)
-    # labels = [categories[i['category_id']]['name'] for i in annotations]
-    # labels = predictions.get_field("labels").tolist()
-    # labels = [categories[i] for i in labels]
+
     if oy is None and ox is None:
         oy, ox = image.shape[:2]
         oy, ox = int(oy / 4), int(ox / 4)
     boxes = [[int(round(y)) for y in x['bbox']] for x in annotations]
     boxes = [[box[0]+ox, box[1]+oy, box[2], box[3]] for box in boxes]
     if background_colors is None:
-        # colors = get_annotation_colors(annotations)
+
         colors = [_BLACK for _ in annotations]
     else:
         colors = background_colors
@@ -311,12 +305,10 @@ def overlay_class_coco(image,
         if show_track_id and 'track_id' in a:
             label = f'{label} ({a["track_id"]})'
         labels.append(label)
-    # labels = [categories[i['category_id']]['name'] for i in annotations]
-    # labels = predictions.get_field("labels").tolist()
-    # labels = [categories[i] for i in labels]
+
     boxes = [[int(round(y)) for y in x['bbox']] for x in annotations]
     if background_colors is None:
-        # colors = get_annotation_colors(annotations)
+
         colors = [_BLACK for _ in annotations]
     else:
         colors = background_colors
@@ -343,6 +335,7 @@ def vis_bbox(image,
     x0, y0, w, h = box
     x1, y1 = int(x0 + w), int(y0 + h)
     x0, y0 = int(x0), int(y0)
+
     # Draw border
     if fill_opacity > 0 and fill_color is not None:
         with_fill = image.copy()
@@ -374,7 +367,6 @@ def overlay_amodal_boxes_coco(image,
         oy, ox = int(oy / 4), int(ox / 4)
     boxes = [[int(round(y)) for y in x['amodal_bbox']] for x in annotations]
     boxes = [[box[0]+ox, box[1]+oy, box[2], box[3]] for box in boxes]
-    # track_ids = [x['track_id'] for x in annotations]
 
     sorted_inds = sorted(range(len(boxes)),
                          key=lambda i: boxes[i][2] * boxes[i][3],
@@ -386,9 +378,7 @@ def overlay_amodal_boxes_coco(image,
     for i in sorted_inds:
         box = boxes[i]
         color = colors[i]
-        # track_id = track_ids[i]
-        # if track_id != 9:
-        #     continue
+
         kwargs = {}
         if fill_opacity:
             kwargs['fill_opacity'] = fill_opacity
@@ -420,7 +410,6 @@ def overlay_modal_boxes_coco(image,
         oy, ox = int(oy / 4), int(ox / 4)
     boxes = [[int(round(y)) for y in x['bbox']] for x in annotations if 'bbox' in x]
     boxes = [[box[0]+ox, box[1]+oy, box[2], box[3]] for box in boxes]
-    # track_ids = [x['track_id'] for x in annotations]
 
     sorted_inds = sorted(range(len(boxes)),
                          key=lambda i: boxes[i][2] * boxes[i][3],
@@ -432,9 +421,6 @@ def overlay_modal_boxes_coco(image,
     for i in sorted_inds:
         box = boxes[i]
         color = colors[i]
-        # track_id = track_ids[i]
-        # if track_id != 9:
-        #     continue
         kwargs = {}
         if fill_opacity:
             kwargs['fill_opacity'] = fill_opacity
@@ -466,7 +452,6 @@ def overlay_amodal_boxes_prediction(image,
         oy, ox = int(oy / 4), int(ox / 4)
     boxes = [[int(round(y)) for y in x['bbox']] for x in annotations]
     boxes = [[box[0]+ox, box[1]+oy, box[2], box[3]] for box in boxes]
-    # track_ids = [x['track_id'] for x in annotations]
 
     sorted_inds = sorted(range(len(boxes)),
                          key=lambda i: boxes[i][2] * boxes[i][3],
@@ -478,9 +463,7 @@ def overlay_amodal_boxes_prediction(image,
     for i in sorted_inds:
         box = boxes[i]
         color = colors[i]
-        # track_id = track_ids[i]
-        # if track_id != 9:
-        #     continue
+
         kwargs = {}
         if fill_opacity:
             kwargs['fill_opacity'] = fill_opacity
@@ -508,7 +491,6 @@ def overlay_boxes_coco(image,
         annotations (List[dict]): List of COCO annotations.
     """
     boxes = [[int(round(y)) for y in x['bbox']] for x in annotations]
-    # track_ids = [x['track_id'] for x in annotations]
 
     sorted_inds = sorted(range(len(boxes)),
                          key=lambda i: boxes[i][2] * boxes[i][3],
@@ -520,9 +502,7 @@ def overlay_boxes_coco(image,
     for i in sorted_inds:
         box = boxes[i]
         color = colors[i]
-        # track_id = track_ids[i]
-        # if track_id != 9:
-        #     continue
+        
         kwargs = {}
         if fill_opacity:
             kwargs['fill_opacity'] = fill_opacity

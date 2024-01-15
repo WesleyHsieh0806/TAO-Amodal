@@ -81,7 +81,7 @@ def default_arg_parser():
     parser.add_argument('--filter-tracks', type=int, nargs='*', 
                         help="If specified, we only visualize the specified track ids.")
     parser.add_argument('--clip-annotation', type=parse_bool, default=False, 
-                        help="If True, we clip the out-of-frame boxes")
+                        help="If True, we clip the out-of-frame annotations.")
     parser.add_argument('--skip-unknown-categories',
                         type=parse_bool,
                         default=False)
