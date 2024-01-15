@@ -105,7 +105,7 @@ python ./vis_prediction.py \
 ```
 | Example Output Video |
 |---|
-| <div align="center"><a href="https://tao-amodal.github.io/static/videos/ae_people-1.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/b7f6b9af-48a3-44eb-a485-4c14b28fbf82"></a></div> |
+| <div align="center"><a href="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/67003936-ea8d-40b6-a0c3-913e99be584b"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/b7f6b9af-48a3-44eb-a485-4c14b28fbf82"></a></div> |
 
 * Visualize all tracks from randomly picked videos.
 ```bash
