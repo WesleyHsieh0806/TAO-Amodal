@@ -37,7 +37,7 @@ python ./vis_amodal_mask_videos.py \
 > More examples could be found [here](https://tao-amodal.github.io/dataset.html).
 
 ---
-2. Visualize a specified track with a certain color
+2. Visualize a specified track
 ```bash
 # Visualize amodal boxes
 python ./vis_amodal_mask_videos.py \
