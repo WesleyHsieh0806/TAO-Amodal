@@ -22,7 +22,7 @@ python ./vis_amodal_mask_videos_webpage.py \
     --mask-annotations /path/to/BURST_annotations/train/train_visibility.json \
     --annotations /path/to/amodal_annotations/train.json \
     --output-dir /path/to/output_dir \
-    --images-dir /path/to/TAO-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal-Amodal/frames \
     --split train \
     --slow-down 25 \
     --speed-up -1 \
@@ -41,10 +41,10 @@ python ./vis_amodal_mask_videos_webpage.py \
 ```bash
 # Visualize amodal boxes
 python ./vis_amodal_mask_videos_webpage.py \
-    --mask-annotations /path/to/TAO/BURST_annotations/val/all_classes_visibility.json \
-    --annotations /path/to/TAO/amodal_annotations/validation.json \
+    --mask-annotations /path/to/TAO-Amodal/BURST_annotations/val/all_classes_visibility.json \
+    --annotations /path/to/TAO-Amodal/amodal_annotations/validation.json \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO/frames \
+    --images-dir /path/to/TAO-Amodal/frames \
     --slow-down 15 \
     --speed-up 2 \
     --split val \
@@ -56,15 +56,15 @@ python ./vis_amodal_mask_videos_webpage.py \
 
 # Visualize modal boxes
 python ./vis_amodal_mask_videos_webpage.py \
-    --mask-annotations /path/to/TAO/BURST_annotations/val/all_classes_visibility.json \
-    --annotations /path/to/TAO/amodal_annotations/validation.json \
+    --mask-annotations /path/to/TAO-Amodal/BURST_annotations/val/all_classes_visibility.json \
+    --annotations /path/to/TAO-Amodal/amodal_annotations/validation.json \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO/frames \
+    --images-dir /path/to/TAO-Amodal/frames \
     --slow-down 15 \
     --speed-up 2 \
     --split val \
     --show-categories False \
-    --transparent False \
+    --transparent True \
     --filter-tracks 14226 \
     --interpolate False \
     --video-name val/LaSOT/cattle-7 \
@@ -87,10 +87,10 @@ The prediction JSON should be structured following [this format](https://hugging
 ```bash
 # Show specified track with a certain color
 python ./vis_amodal_prediction_comparison.py \
-    --annotations /path/to/TAO/amodal_annotations/validation_lvis_v1.json \
+    --annotations /path/to/TAO-Amodal/amodal_annotations/validation_lvis_v1.json \
     --predictions /path/to/prediction.json \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal-Amodal/frames \
     --split val \
     --slow-down 15 \
     --speed-up 1 \
@@ -102,11 +102,11 @@ python ./vis_amodal_prediction_comparison.py \
 ```bash
 # Visualize all tracks from randomly picked videos
 python ./vis_amodal_prediction_comparison.py \
-    --annotations /path/to/TAO/amodal_annotations/validation_lvis_v1.json \
+    --annotations /path/to/TAO-Amodal/amodal_annotations/validation_lvis_v1.json \
     --predictions /path/to/prediction.json \
     --split val \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal-Amodal/frames \
     --slow-down 15 \
     --speed-up 1 \
     --random-quality-check True \
@@ -120,11 +120,11 @@ Run the following command to compare predictions from two trackers. For example,
 ```bash
 # Show specified track with a certain color
 python ./vis_amodal_prediction_comparison.py \
-    --annotations /path/to/TAO/amodal_annotations/validation_lvis_v1.json \
+    --annotations /path/to/TAO-Amodal/amodal_annotations/validation_lvis_v1.json \
     --predictions /path/to/modal_prediction.json \
     --predictions2 /path/to/prediction.json \
     --output-dir /path/to/output-dir \
-    --images-dir /path/to/TAO-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal-Amodal/frames \
     --split val \
     --slow-down 15 \
     --speed-up 1 \
