@@ -134,9 +134,12 @@ python ./vis_amodal_prediction_comparison.py \
     --video-name val/ArgoVerse/side_left_043aeba7-14e5-3cde-8a5c-639389b6d3a6
 ```
 
-| Modal | Amodal |
+| Modal | Amodal|
 |---|---|
-|<div align="center"><a href="https://tao-amodal.github.io/static/videos/cattle-7_both.mp4"><img width="95%" alt="TAO-Amodal" src="https://tao-amodal.github.io/static/images/webpage_preview.png"></a></div> | <div align="center"><a href="https://tao-amodal.github.io/static/videos/cattle-7_both.mp4"><img width="95%" alt="TAO-Amodal" src="https://tao-amodal.github.io/static/images/webpage_preview.png"></a></div>|
+|<div align="center"><a href="https://tao-amodal.github.io/static/videos/ae_people-1.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/67eb0171-b72a-48c1-bf04-e6f13bb2ca23"></a></div> | <div align="center"><a href="https://tao-amodal.github.io/static/videos/ae_people-1.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/b7f6b9af-48a3-44eb-a485-4c14b28fbf82"></a></div> |
+
+
+
 
 > More examples could be found [here](https://tao-amodal.github.io/#Amodal-Expander).
 
