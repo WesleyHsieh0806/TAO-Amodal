@@ -76,7 +76,6 @@ python ./vis_amodal_mask_videos_webpage.py \
 | Modal | Amodal |
 |---|---|
 |<div align="center"><a href="https://tao-amodal.github.io/static/videos/cattle-7_both.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/c0398f59-3d33-4390-b68f-ab68a0a184da"></a></div> | <div align="center"><a href="https://tao-amodal.github.io/static/videos/cattle-7_both.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/assets/55971907/bfe42828-79a3-48dd-b68d-19fa12c008f2"></a></div>|
-|<div align="center"><a href="https://tao-amodal.github.io/static/videos/cattle-7_both.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/blob/main/assets/cattle-7_modal.gif"></a></div> | <div align="center"><a href="https://tao-amodal.github.io/static/videos/cattle-7_both.mp4"><img width="95%" alt="TAO-Amodal" src="https://github.com/WesleyHsieh0806/TAO-Amodal/blob/main/assets/cattle-7_amodal.gif"></a></div>|
 
 ---
 
