@@ -91,7 +91,7 @@ bash environment_setup.sh
 ## :artist: Visualization
 Visualize our dataset and tracker predictions to get a better understanding of amodal tracking. Instructions could be found [here](./visualization/Readme.md).
   <div align="center">
-  <a href="./visualization/Readme.md"><img width="55%" alt="TAO-Amodal" src="./assets/tao_amodal_github_visualization_short_crop.gif"></a>
+  <a href="./visualization/Readme.md"><img width="95%" alt="TAO-Amodal" src="./assets/truck-10.gif"></a>
    </div>
 
 
