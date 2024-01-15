@@ -46,6 +46,9 @@ def interpolate_annotations(frames, annotations, modal=True):
                 if k not in ('bbox', 'segmentation', 'area', 'id', 'image_id')
             }
             if modal:
+                if 'bbox' not in start or 'bbox' not in end:
+                    continue
+                
                 ann['bbox'] = [
                     alpha * a + (1 - alpha) * b
                     for a, b in zip(start['bbox'], end['bbox'])

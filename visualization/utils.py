@@ -40,7 +40,7 @@ def default_arg_parser():
     # Video settings.
     parser.add_argument('--clip-video-length', default=None, type=int, 
                         help="If this number is given, we randomly visualize a small interval of the video to control the video length.")
-    parser.add_argument('--show-image-id', default=True, type=parse_bool,
+    parser.add_argument('--show-image-id', default=False, type=parse_bool,
                         help='If True, the ```image_id``` of each frame will be displayed at \
                             the top of the video')
     parser.add_argument(

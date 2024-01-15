@@ -176,8 +176,8 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                     color = color_map[track_id]
                     if args.color:
                         color = args.color
-                    if args.filter_tracks and (track_id + min_track - 1) not in args.filter_tracks:
-                        continue
+                    # if args.filter_tracks and (track_id + min_track - 1) not in args.filter_tracks:
+                    #     continue
                     full_mask = np.zeros((1, height*2, width*2), dtype=np.uint8)
                     full_mask[:, starty:endy, startx:endx] = mask_t[track_id].astype(np.uint8)
                     full_image = vis_utils.vis_mask(full_image,
@@ -208,7 +208,7 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                 if args.filter_tracks:
                     colors = [color for i, color in enumerate(colors) if annotations[i]['track_id'] in args.filter_tracks]
                     annotations = [ann for ann in annotations if ann['track_id'] in args.filter_tracks]
-                opacity = 0.65
+                opacity = -1
                 thickness = 3
                 font_scale = 1.0
                 font_thickness = 2
