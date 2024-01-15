@@ -31,7 +31,7 @@
       <a href="#artist-visualization">Visualization </a>
     </li>
     <li>
-      <a href="#running-training">Training</a>
+      <a href="#running-training-and-inference">Training and Inference</a>
     </li>
     <li>
       <a href="#bar_chart-evaluation">Evaluation</a>
@@ -95,7 +95,10 @@ Visualize our dataset and tracker predictions to get a better understanding of a
    </div>
 
 
-## :running: Training
+## :running: Training and Inference
+We provide the training and inference code of the proposed [Amodal Expander](https://github.com/WesleyHsieh0806/Amodal-Expander). 
+
+> The inference code generates a `lvis_instances_results.json`, which could be used to obtain the evaluation results as introduced in the next section. 
 
 ## :bar_chart: Evaluation
 
@@ -121,7 +124,8 @@ python eval_on_tao_amodal.py --track_result /path/to/prediction.json \
                              --output_log   /path/to/output.log \
                              --annotation   /path/to/validation_lvis_v1.json
 ```
- 
+
+> Annotation JSON is provided in our dataset. Evaluation results will be written in your console and saved in `--output_log`.
 
 
 ## Citations
