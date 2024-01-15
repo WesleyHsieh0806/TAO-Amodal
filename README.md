@@ -89,7 +89,10 @@ bash environment_setup.sh
 >    Explore more examples from our dataset [here](https://tao-amodal.github.io/dataset.html).
 
 ## :artist: Visualization
-
+After downloading our dataset, we recommend visualizing our dataset and tracker predictions to get a better understanding of amodal tracking. Instructions could be found [here](./visualization/Readme.md).
+  <div align="center">
+  <a href="./visualization/Readme.md"><img width="95%" alt="TAO-Amodal" src="https://tao-amodal.github.io/static/images/webpage_preview.png"></a>
+   </div>
 
 
 ## :running: Training
