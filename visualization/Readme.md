@@ -18,11 +18,11 @@ We provide various visualization functionlaities on TAO-Amodal, including:
 1. Randomly visualize 5 videos from each subset in TAO-Amodal training set. Videos will be saved in ```output-dir```.
 ```bash
 # Modify --mask-annotations, --annotations, --output-dir, --images-dir
-python ./vis_amodal_mask_videos_webpage.py \
+python ./vis_amodal_mask_videos.py \
     --mask-annotations /path/to/BURST_annotations/train/train_visibility.json \
     --annotations /path/to/amodal_annotations/train.json \
     --output-dir /path/to/output_dir \
-    --images-dir /path/to/TAO-Amodal-Amodal/frames \
+    --images-dir /path/to/TAO-Amodal/frames \
     --split train \
     --slow-down 25 \
     --speed-up -1 \
@@ -40,7 +40,7 @@ python ./vis_amodal_mask_videos_webpage.py \
 2. Visualize a specified track with a certain color
 ```bash
 # Visualize amodal boxes
-python ./vis_amodal_mask_videos_webpage.py \
+python ./vis_amodal_mask_videos.py \
     --mask-annotations /path/to/TAO-Amodal/BURST_annotations/val/all_classes_visibility.json \
     --annotations /path/to/TAO-Amodal/amodal_annotations/validation.json \
     --output-dir /path/to/output-dir \
@@ -55,7 +55,7 @@ python ./vis_amodal_mask_videos_webpage.py \
     --video-name val/LaSOT/cattle-7
 
 # Visualize modal boxes
-python ./vis_amodal_mask_videos_webpage.py \
+python ./vis_amodal_mask_videos.py \
     --mask-annotations /path/to/TAO-Amodal/BURST_annotations/val/all_classes_visibility.json \
     --annotations /path/to/TAO-Amodal/amodal_annotations/validation.json \
     --output-dir /path/to/output-dir \

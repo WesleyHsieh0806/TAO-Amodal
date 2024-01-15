@@ -35,9 +35,6 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
     separator = args.separator_width
 
     output_video = args.output_dir / (video + '.mp4')
-    # if output_video.exists():
-    #     logging.info(f'{output_video} exists, skipping')
-    #     return
     frames_dir = args.images_dir / video
     if not frames_dir.exists():
         logging.warn(f"Could not find images at {frames_dir}")
@@ -91,11 +88,14 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                 if f.stem in frame_annotations)
 
     frames = frames[first:last+1]
+    
+    # Generate annotations at non-annotated frames using interpolation.
     interpolated_annotations = {}
     if args.use_tracks and args.interpolate:
         interpolated_annotations = interpolate_annotations(
             [x.stem for x in frames], frame_annotations, modal=args.modal)
 
+    # If not None, we additionally draw original frames along with the labeled frames.
     unlabeled_location = None
     if (args.original_location == 'top'
             or (args.original_location == 'auto' and width > height)):
@@ -115,7 +115,12 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
 
     nof_annotated = 0
     min_track = float('inf')
+
+    '''
+    * Video visualization
+    '''
     with video_writer(str(output_video), (width, height)) as writer:
+        # Randomly clip video lengths to a certain length.
         if args.clip_video_length:
             for frame in frames:
                 if frame.stem not in frame_annotations:
@@ -134,12 +139,10 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
             is_annotated = frame.stem in frame_annotations
             is_interpolated = frame.stem in interpolated_annotations
             
+            # Ignore all unlabeled frames when speed_up is -1.
             if ((not is_mask_annotated) and (not is_annotated)
                     and (args.speed_up < 0 or (i % args.speed_up) != 0)):
-                # ignore those unlabeled frames
                 continue
-            # if ((not is_mask_annotated) and (not is_annotated)):
-                # continue
             frame = Path(str(frame).replace('ArgoVerse1.1', 'Argoverse-1.1'))
             image = np.array(Image.open(frame))
             full_image = np.ones((height*2, width*2, 3), dtype=np.uint8) * 255
@@ -149,7 +152,9 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
             endy = starty + height
             full_image[starty:endy, startx:endx, :] = image
             
-            # plot GT.
+            '''
+            * Get bounding box annotations.
+            '''
             if is_annotated:
                 annotations = frame_annotations[frame.stem]
                 if min_track == float('inf') and annotations:
@@ -176,8 +181,11 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                     color = color_map[track_id]
                     if args.color:
                         color = args.color
+                    
+                    # Uncomment the following two lines if you want to filter the mask with track ids.
                     # if args.filter_tracks and (track_id + min_track - 1) not in args.filter_tracks:
                     #     continue
+
                     full_mask = np.zeros((1, height*2, width*2), dtype=np.uint8)
                     full_mask[:, starty:endy, startx:endx] = mask_t[track_id].astype(np.uint8)
                     full_image = vis_utils.vis_mask(full_image,
@@ -191,7 +199,7 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
 
                 
             '''
-            * Plot the amodal annotation
+            * Visualize Box Annotations.
             '''
             if is_annotated or is_interpolated:
                 if is_interpolated:
@@ -199,15 +207,21 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                 else:
                     annotations = frame_annotations[frame.stem]
                 colors = None
+
+                # Get bounding box color for each track.
                 if args.use_tracks:
                     colors = [
                         color_map[x['track_id']  - min_track + 1] for x in annotations
                     ]
                     if args.color:
                         colors = [args.color for color in colors]
+                
+                # Filter tracks based on track ids.
                 if args.filter_tracks:
                     colors = [color for i, color in enumerate(colors) if annotations[i]['track_id'] in args.filter_tracks]
                     annotations = [ann for ann in annotations if ann['track_id'] in args.filter_tracks]
+                
+                # Hyperparameters for bounding box and font.
                 opacity = -1
                 thickness = 3
                 font_scale = 1.0
@@ -218,10 +232,12 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                         clip_annotation(x, image)
                 
                 visualized = full_image.copy()
+
+                # Emphasize bounding boxes by increasing the transparency of background.
                 if args.transparent:
                     visualized = vis_utils.transparent_except_bbox(visualized, annotations, modal=args.modal, opacity=0.25)
                 
-                # draw the bounding box
+                # Draw the bounding box.
                 if not args.modal:
                     visualized = vis_utils.overlay_amodal_boxes_coco(visualized,
                                                           annotations,
@@ -236,6 +252,7 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                                                           thickness=thickness,
                                                           fill_opacity=opacity)
                 if args.show_categories:
+                    # Show the category name on top of each box.
                     visualized = vis_utils.overlay_amodal_class_coco(
                         visualized,
                         annotations,
@@ -245,7 +262,7 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                         font_thickness=font_thickness,
                         show_track_id=args.show_track_id)
                 elif args.show_visibility:
-                    # shows the visibility of each amodal bounding box
+                    # Shows the category name on top of each box.
                     visualized = vis_utils.overlay_amodal_visibility_coco(
                         visualized,
                         annotations,
@@ -260,28 +277,29 @@ def visualize(coco, video: str, labeled_frames, args, burst_video):
                 elif unlabeled_location == 'left':
                     visualized = np.concatenate(
                         [image, black_line, visualized], axis=1)
+                
+                # Slow down frames with box annotations.
                 for _ in range(
                         args.slow_down if not is_interpolated else 1):
                     visualized = cv2.resize(visualized, (width, height))
                     writer.write_frame(visualized)
-                # for _ in range(
-                #         args.slow_down):
-                #     visualized = cv2.resize(visualized, (width, height))
-                #     writer.write_frame(visualized)
+
             else:
                 if unlabeled_location == 'top':
                     full_image = np.concatenate([full_image, full_image])
                 elif unlabeled_location == 'left':
                     full_image = np.concatenate([full_image, full_image], axis=1)
-                # for _ in range(2):
-                #     full_image = cv2.resize(full_image, (width, height))
-                #     writer.write_frame(full_image)
+                
+                # Draw frames without box annotations.
+                # Note that frames with masks are not slowed down.
                 full_image = cv2.resize(full_image, (width, height))
                 writer.write_frame(full_image)
 
 
 def main():
-    # Use first line of file docstring as description if it exists.
+    '''
+    * Process Arguments
+    '''
     args = default_arg_parser()
     args.output_dir.mkdir(exist_ok=True, parents=True)
     common_setup(__file__, args.output_dir, args)
@@ -293,7 +311,7 @@ def main():
     dataset = BURSTDataset(annotations_file=args.mask_annotations,
                            images_base_dir=args.images_dir)
     '''
-    * Get the video names that we want to visualize
+    * Get the video names we want.
     '''
     get_video_name(args)
 
@@ -303,9 +321,6 @@ def main():
     all_videos = set()
     videos = collections.defaultdict(list)
     for image in coco.imgs.values():
-        # print(image)
-        # if 'LaSOT' in image:
-        #     continue
         if 'video' in image:
             video = str(Path(image['video']).with_suffix(''))
         else:
@@ -313,19 +328,15 @@ def main():
         all_videos.add(video)
 
         if args.video_name is None or video in args.video_name or args.video_name[0] in video:
-            # video example: train/YFCC100M/v_f69ebe5b731d3e87c1a3992ee39c3b7e
             videos[video].append(image)
     tasks = []
     for video, labeled_frames in videos.items():
-        # print(video, labeled_frames)
-        # if 'LaSOT' in video:
-        #     continue
         output_video = args.output_dir / (video + '.mp4')
-        # if output_video.exists():
-        #     logging.info(f'{output_video} exists, skipping')
-        #     continue
         tasks.append((coco, video, labeled_frames, args, dataset.get_video_by_name(video)))
 
+    '''
+    * Visualization with Multi-Processing
+    '''
     if args.workers == 0:
         for task in tqdm(tasks):
             visualize(*task)
